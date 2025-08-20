@@ -1,7 +1,7 @@
 /*
     @Author : Roger Moraes de Moura
-    @Version: 1.0.0
-    @Data   : 17/08/2025
+    @Version: 1.0.1
+    @Data   : 20/08/2025
 
 */
 
@@ -12,52 +12,57 @@
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 
 // Pino do potenciômetro
-const int potPin = 34;
+#define potPin 34
 // Constantes
-const int sensorPino = 34;
-const int leituras = 50;
+#define sensorPino 34
+#define leituras 50
+
 // Variáveis
-long sensorValor;
+long sensor;
 float temperatura;
 
 void lcdConfig(){
   lcd.init();      
   lcd.backlight();
   lcd.setCursor(0, 0);
-  lcd.print("Sistema Iniciando!");
+  lcd.print("Testando A/D");
+}
+
+void ADConfig(){
+   // configurações do A/D
+    //analogSetAttenuation (ADC_0db);  // Para todos os pinos
+  // Atenuação: ADC_0db, ADC_2_5db, ADC_6db, ADC_11db
+  // 0dB: 100 - 950mV # 2.5dB: 100 - 1250mV # 6dB: 150 - 1750mV # 11dB: 150 - 2450mV
+ // Atenuação de 6db no pino sensorPino
+  //analogSetCycles(16); // define o número de ciclos por amostra. O padrão é 8. Intervalo: 1 a 255.
+  //analogSetSamples(1); // define o número de amostras no intervalo. O padrão é 1 amostra. Tem um efeito de aumentar a sensibilidade
+  analogReadResolution ( 12 );
+  analogSetPinAttenuation (sensorPino, ADC_6db);
 }
 
 
 void setup() {
   Serial.begin(115200);
-  // configurações do A/D
-  analogReadResolution ( 12 ); // resolução de 12 bits
-  //analogSetAttenuation (ADC_0db);  // Para todos os pinos
-  // Atenuação: ADC_0db, ADC_2_5db, ADC_6db, ADC_11db
-  // 0dB: 100 - 950mV # 2.5dB: 100 - 1250mV # 6dB: 150 - 1750mV # 11dB: 150 - 2450mV
-  analogSetPinAttenuation (sensorPino, ADC_6db); // Atenuação de 6db no pino sensorPino
-  //analogSetCycles(16); // define o número de ciclos por amostra. O padrão é 8. Intervalo: 1 a 255.
-  //analogSetSamples(1); // define o número de amostras no intervalo. O padrão é 1 amostra. Tem um efeito de aumentar a sensibilidade
+  ADConfig();
   lcdConfig();
 
 }
 void loop() {
   // Leitura do sensor
-  sensorValor = 0;  // zera as leituras
+  sensor = 0;  // zera as leituras
   for (int i = 0; i < leituras; i++) {
-    sensorValor = sensorValor + analogRead(sensorPino); // acumula as leituras
+    sensor = sensor + analogRead(sensorPino); // acumula as leituras
     delay(1); // tempo para o conversor
   }
-  sensorValor = sensorValor / leituras; // calcula a média
-  Serial.print(sensorValor);  // imprime a media da conversão
-  float millivolts = ((float)sensorValor / 4095) * 3300; // Calcula o valor obtido do conversor para mV
-  Serial.print(" -> ");
-  Serial.print(millivolts); // imprime o valor em mV
-  float temperatura = millivolts / 10;  // calucla a temperatura
-  Serial.print("mV -> Temperatura = ");
-  Serial.print(temperatura);  // imprime a temperatura
-  Serial.println("ºC");
-  delay(1000);  // tempo entre cada medida
+  sensor = sensor / leituras; // calcula a média
+  float volts =( ((float)sensor / 4095) * 3300) / 1000; // Calcula o valor obtido do conversor para mV e converte paara Volts
+ char buffer[10];  // cria um buffer para armazenar o número formatado
+dtostrf(volts, 7, 3, buffer); 
+
+lcd.setCursor(0, 2);
+lcd.print(buffer);
+lcd.print(" v");
+  delay(1000);  
 }
 
 
