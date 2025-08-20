@@ -6,3 +6,5 @@ Bem-vindo ao repositório com os exercícios desenvolvidos durante os estudos de
 ## 📂 Exercícios
 
 - [📁 ligar_led](ligar_led/) — Primeiro exercício: acender dois leds com display ldcI2C
+
+- [📁 saída A/D ](saída A/D) — Segundo exercício: Testando saída AD no ESP32
