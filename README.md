@@ -7,4 +7,4 @@ Bem-vindo ao repositório com os exercícios desenvolvidos durante os estudos de
 
 - [📁 ligar_led](ligar_led/) — Primeiro exercício: acender dois leds com display ldcI2C
 
-- [📁 saída A/D ](saída A/D) — Segundo exercício: Testando saída AD no ESP32
+- [📂 [Saída A/D](https://github.com/roger-ufrgs/Curso-Parobe/tree/main/potenciometro)— Segundo exercício: Testando saída AD no ESP32
