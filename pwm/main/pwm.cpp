@@ -2,23 +2,18 @@
 #include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
 
+LiquidCrystal_I2C lcd(0x27, 20, 4);
 
-// ======================= LCD =======================
-#define LCD_ENDERECO  0x27
-#define LCD_COLUNAS   20
-#define LCD_LINHAS    4
-LiquidCrystal_I2C lcd(LCD_ENDERECO, LCD_COLUNAS, LCD_LINHAS);
+#define POT_PIN   25
+#define LED_PIN   26
 
-// =================== Pinos / HW ===================
-#define POT_PIN   25   // Analógico (somente entrada)
-#define BT_PIN    18   // Botão (com pull-up interno)
-#define PWM_PIN   25   // LED / saída PWM
-
-// =================== PWM ESP32 ====================
 #define PWM_CANAL      0
-#define PWM_FREQ       5000  // Hz
-#define PWM_RESOLUCAO  8     // 0-255
+#define PWM_FREQ       5000
+#define PWM_RESOLUCAO  8
 
+int leituraPot = 0;
+int dutyPercentual = 0;
+int dutyValor = 0;
 int configuracao = 0;
 
 void lcdConfig(){
@@ -33,12 +28,24 @@ void lcdConfig(){
 }
 
 void setup(){
-    configuracao = ledcAttachChannel(POT_PIN,PWM_FREQ,PWM_RESOLUCAO,PWM_CANAL);
-    lcdConfig();
-
-    
+    pinMode(LED_PIN,OUTPUT);
+    configuracao = ledcAttachChannel(LED_PIN,PWM_FREQ,PWM_RESOLUCAO,PWM_CANAL);
+    lcdConfig();    
 }
 void loop() {
+    leituraPot = analogRead(POT_PIN);
+    dutyPercentual = map(leituraPot,0,4095,0,100);
+    // Converte para o valor PWM
+    dutyValor = map(dutyPercentual,0,100,0,255);
+    ledcWrite(LED_PIN,dutyPercentual);
+    lcd.setCursor(0,0);
+    lcd.print(dutyPercentual);
+    lcd.print(" %");
+    lcd.setCursor(0,1);
+    lcd.print(dutyValor);
+    delay(1000);
+    lcd.clear();
+
     
 
 }
