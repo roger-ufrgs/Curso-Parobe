@@ -6,13 +6,16 @@
 #define ENDERECO 0                  // Endereço onde salva o número
 
 // Pinos dos botões
-#define BT_INCREMENTO 27
-#define BT_DECREMENTO 14
+#define BT_INCREMENTO 32
+#define BT_DECREMENTO 33
 #define BT_GRAVAR 12
-#define BT_LEITURA 13
-#define BT_RESET 26
+#define BT_LEITURA 14
+#define BT_RESET 13
 
-int numero = 0;                     // Valor atual do contador
+int valores[5] = {0, 0, 0, 0, 0};
+
+int numero = 0;
+int capacidade = 30;
 
 LiquidCrystal_I2C lcd(0x27,20,4);  // Instância do LCD
 void testaBotaoMais() {
@@ -39,10 +42,20 @@ void testaBotaoGrava() {
 }
 
 void verifica(int bt, void (*funcao)()){
-  if(digitalRead(bt) == LOW){
-      while(digitalRead(bt) == LOW);
-      funcao();
+  if(bt < capacidade) funcao();
+}
+
+void mediaValores(){
+  //faz 100 leituras de cada sensor touch e calcula a média do valor lido
+  for(int i=0; i< 100; i++)
+  {
+    valores[0]+= touchRead(BT_INCREMENTO);
+    valores[1]+= touchRead(BT_DECREMENTO);
+    valores[2]+= touchRead(BT_GRAVAR);
+    valores[3]+= touchRead(BT_LEITURA);
+    valores[4]+= touchRead(BT_RESET);
   }
+  for (int i = 0; i < 5; i++)   valores[i] = valores[i] / 100;
 }
 
 void testaBotaoLe() {
@@ -73,21 +86,18 @@ void lcdConfig(){
 }
 
 void setup() {
-  EEPROM.begin(EEPROM_SIZE);              // Inicia EEPROM
+  EEPROM.begin(EEPROM_SIZE);
+  Serial.begin(115200);
   lcdConfig();
-  pinMode(BT_INCREMENTO, INPUT_PULLUP);  // Botão de incremento
-  pinMode(BT_DECREMENTO, INPUT_PULLUP); // Botão de decremento
-  pinMode(BT_GRAVAR, INPUT_PULLUP); // Botão para gravar
-  pinMode(BT_LEITURA, INPUT_PULLUP);    // Botão para ler
-  pinMode(BT_RESET, INPUT_PULLUP); // Botão para resetar
 }
 
 void loop() {
-  verifica(BT_INCREMENTO,testaBotaoMais);
-  verifica(BT_DECREMENTO,testaBotaoMenos);   
-  verifica(BT_GRAVAR,testaBotaoGrava);  
-  verifica(BT_LEITURA,testaBotaoLe);
-  verifica(BT_RESET,testaBotaoReset);     
+  mediaValores();
+  verifica(valores[0],testaBotaoMais);
+  verifica(valores[1],testaBotaoMenos);
+  verifica(valores[2],testaBotaoGrava);
+  verifica(valores[3],testaBotaoLe);
+  verifica(valores[4],testaBotaoReset); 
   mostraLcd(); 
 }
 extern "C" void app_main() {
