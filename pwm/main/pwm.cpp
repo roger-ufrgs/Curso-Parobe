@@ -2,55 +2,53 @@
 #include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
 
-#define pot 34                
-#define leituras 10           
-#define led 26                 
-#define canalPWM 0            
-#define frequenciaPWM 1000    
-#define resoluPWM 10          
 
-// Variáveis globais
-int valorAnalogico;
-int percPWM;
+// ======================= LCD =======================
+#define LCD_ENDERECO  0x27
+#define LCD_COLUNAS   20
+#define LCD_LINHAS    4
+LiquidCrystal_I2C lcd(LCD_ENDERECO, LCD_COLUNAS, LCD_LINHAS);
 
-LiquidCrystal_I2C lcd(0x27, 20, 4);  // Endereço I2C e tamanho do LCD
+// =================== Pinos / HW ===================
+#define POT_PIN   25   // Analógico (somente entrada)
+#define BT_PIN    18   // Botão (com pull-up interno)
+#define PWM_PIN   25   // LED / saída PWM
 
-void atualizaPWM() {
-  percPWM = map(valorAnalogico, 0, 1023, 0, 100);     // Percentual para LCD
-  ledcWrite(canalPWM, valorAnalogico);                // Brilho do LED
-}
-void atualizaLcd() {
-  lcd.setCursor(0, 1);
-  lcd.print(percPWM);
-  lcd.print("%   ");  // Apaga sobras de valores antigos (ex: de 100% para 9%)
-}
-void leituraAnalogica() {
-  valorAnalogico = 0;
-  for (int i = 0; i < leituras; i++) {
-    valorAnalogico += analogRead(pot);
-    delay(2);
-  }
-  valorAnalogico /= leituras;
-}
+// =================== PWM ESP32 ====================
+#define PWM_CANAL      0
+#define PWM_FREQ       5000  // Hz
+#define PWM_RESOLUCAO  8     // 0-255
 
-void setup() {
-  lcd.init();              // Inicializa o LCD
-  lcd.backlight();         // Liga a luz de fundo do LCD
-  lcd.setCursor(0, 0);
-  lcd.print("LUZ LED");
+int configuracao = 0;
 
-  analogReadResolution(10);                  // Resolução de leitura analógica
-  analogSetPinAttenuation(pot, ADC_11db);    // Atenuação para leitura (ESP32)
-
-  ledcSetup(canalPWM, frequenciaPWM, resoluPWM);  // Configura PWM
-  ledcAttachPin(led, canalPWM);                   // Associa pino ao canal PWM
+void lcdConfig(){
+    lcd.init();
+    lcd.backlight();
+    lcd.setCursor(0,0);
+    lcd.print("Iniciando o Sistema!");
+    lcd.setCursor(0,1);
+    lcd.print(configuracao ? "Config Ok." : "Config Fail.");
+    delay(3000);
+    lcd.clear();
 }
 
+void setup(){
+    configuracao = ledcAttachChannel(POT_PIN,PWM_FREQ,PWM_RESOLUCAO,PWM_CANAL);
+    lcdConfig();
+
+    
+}
 void loop() {
-  leituraAnalogica();  // Lê o potenciômetro
-  atualizaPWM();       // Atualiza brilho do LED
-  atualizaLcd();       // Mostra no display
+    
+
 }
 
-
-
+// Ponto de entrada principal do ESP-IDF com Arduino
+extern "C" void app_main() {
+  initArduino();  
+  setup();
+  while (true) {
+    loop();
+    delay(1);  // Evita o watchdog
+  }
+}
