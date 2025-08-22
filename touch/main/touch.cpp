@@ -42,7 +42,10 @@ void testaBotaoGrava() {
 }
 
 void verifica(int bt, void (*funcao)()){
-  if(bt < capacidade) funcao();
+  if(bt < capacidade){
+    delay(100);
+    funcao();
+  } 
 }
 
 void mediaValores(){
@@ -100,6 +103,7 @@ void loop() {
   verifica(valores[4],testaBotaoReset); 
   mostraLcd(); 
 }
+
 extern "C" void app_main() {
     initArduino();  
     setup();
