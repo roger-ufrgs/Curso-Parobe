@@ -12,3 +12,7 @@ Bem-vindo ao repositório com os exercícios desenvolvidos durante os estudos de
 - [📂 EEPROM](https://github.com/roger-ufrgs/Curso-Parobe/tree/main/eeprom)— Quinto exercício: Testando EEPROM.
 
 - [📂 PWM](https://github.com/roger-ufrgs/Curso-Parobe/tree/main/pwm)— Terceiro exercício: Testando PWM.
+
+- [📂 TOUCH](https://github.com/roger-ufrgs/Curso-Parobe/tree/main/touch)— Sexto exercício: Testando Touch.
+
+
